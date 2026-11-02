@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- Publish via npm Trusted Publishing (OIDC).
+
 ## 0.1.0
 
 - Signal8 API credential (API key, sent as `X-Api-Key`).

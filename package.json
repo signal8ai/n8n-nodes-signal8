@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-signal8",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "n8n nodes for the Signal8 public API: company quotes, insider transactions, dilution snapshots, material SEC filings, trading halts and congressional trades.",
 	"license": "MIT",
 	"homepage": "https://signal8.ai",
