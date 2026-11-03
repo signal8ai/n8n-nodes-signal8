@@ -1,5 +1,5 @@
 import type { INodeProperties } from 'n8n-workflow';
-import { returnAllAndLimit, tickerField, tickerPath, unwrap } from '../shared';
+import { tickerField, tickerPath, unwrap } from '../shared';
 
 const show = { resource: ['congress'] };
 const showGet = { ...show, operation: ['getRecentTrades'] };
@@ -30,7 +30,38 @@ export const congressDescription: INodeProperties[] = [
 		default: 'getRecentTrades',
 	},
 	tickerField('congress', 'getRecentTrades'),
-	...returnAllAndLimit(showGet, 200),
+	{
+		displayName: 'Return All',
+		name: 'returnAll',
+		type: 'boolean',
+		default: false,
+		description: 'Whether to return all results or only up to a given limit',
+		displayOptions: { show: { resource: ['congress'], operation: ['getRecentTrades'] } },
+		routing: {
+			send: { paginate: '={{ $value }}' },
+			operations: {
+				pagination: {
+					type: 'offset',
+					properties: {
+						limitParameter: 'limit',
+						offsetParameter: 'offset',
+						pageSize: 100,
+						type: 'query',
+					},
+				},
+			},
+		},
+	},
+	{
+		displayName: 'Limit',
+		name: 'limit',
+		type: 'number',
+		typeOptions: { minValue: 1, maxValue: 200 },
+		default: 50,
+		description: 'Max number of results to return',
+		displayOptions: { show: { resource: ['congress'], operation: ['getRecentTrades'], returnAll: [false] } },
+		routing: { send: { type: 'query', property: 'limit' } },
+	},
 	{
 		displayName: 'Options',
 		name: 'options',
