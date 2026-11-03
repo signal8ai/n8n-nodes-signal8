@@ -34,3 +34,50 @@ export function unwrap(listKey?: string) {
 	}
 	return { output: { postReceive: steps } };
 }
+
+/**
+ * Return All + Limit for a list operation, the n8n convention for paging.
+ * Return All on: the node follows the API's `offset` itself, `pageSize` rows
+ * per request, until a short page comes back. Return All off: one request for
+ * up to Limit rows. `maxLimit` is the API's per-request cap for this endpoint.
+ */
+export function returnAllAndLimit(
+	show: Record<string, string[]>,
+	maxLimit: number,
+	pageSize = 100,
+): INodeProperties[] {
+	return [
+		{
+			displayName: 'Return All',
+			name: 'returnAll',
+			type: 'boolean',
+			default: false,
+			description: 'Whether to return all results or only up to a given limit',
+			displayOptions: { show },
+			routing: {
+				send: { paginate: '={{ $value }}' },
+				operations: {
+					pagination: {
+						type: 'offset',
+						properties: {
+							limitParameter: 'limit',
+							offsetParameter: 'offset',
+							pageSize: Math.min(pageSize, maxLimit),
+							type: 'query',
+						},
+					},
+				},
+			},
+		},
+		{
+			displayName: 'Limit',
+			name: 'limit',
+			type: 'number',
+			typeOptions: { minValue: 1, maxValue: maxLimit },
+			default: 50,
+			description: 'Max number of results to return',
+			displayOptions: { show: { ...show, returnAll: [false] } },
+			routing: { send: { type: 'query', property: 'limit' } },
+		},
+	];
+}

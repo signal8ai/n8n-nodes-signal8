@@ -1,5 +1,5 @@
 import type { INodeProperties } from 'n8n-workflow';
-import { tickerField, tickerPath, unwrap } from '../shared';
+import { returnAllAndLimit, tickerField, tickerPath, unwrap } from '../shared';
 
 const show = { resource: ['insider'] };
 const showGet = { ...show, operation: ['getTransactions'] };
@@ -30,33 +30,5 @@ export const insiderDescription: INodeProperties[] = [
 		default: 'getTransactions',
 	},
 	tickerField('insider', 'getTransactions'),
-	{
-		displayName: 'Limit',
-		name: 'limit',
-		type: 'number',
-		typeOptions: { minValue: 1, maxValue: 500 },
-		default: 50,
-		description: 'Max number of results to return',
-		displayOptions: { show: showGet },
-		routing: { send: { type: 'query', property: 'limit' } },
-	},
-	{
-		displayName: 'Options',
-		name: 'options',
-		type: 'collection',
-		placeholder: 'Add Option',
-		default: {},
-		displayOptions: { show: showGet },
-		options: [
-			{
-				displayName: 'Offset',
-				name: 'offset',
-				type: 'number',
-				typeOptions: { minValue: 0 },
-				default: 0,
-				description: 'Number of results to skip, for paging through older transactions',
-				routing: { send: { type: 'query', property: 'offset' } },
-			},
-		],
-	},
+	...returnAllAndLimit(showGet, 500),
 ];

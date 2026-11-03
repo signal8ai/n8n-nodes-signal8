@@ -1,5 +1,5 @@
 import type { INodeProperties } from 'n8n-workflow';
-import { tickerField, tickerPath, unwrap } from '../shared';
+import { returnAllAndLimit, tickerField, tickerPath, unwrap } from '../shared';
 
 const show = { resource: ['congress'] };
 const showGet = { ...show, operation: ['getRecentTrades'] };
@@ -30,16 +30,7 @@ export const congressDescription: INodeProperties[] = [
 		default: 'getRecentTrades',
 	},
 	tickerField('congress', 'getRecentTrades'),
-	{
-		displayName: 'Limit',
-		name: 'limit',
-		type: 'number',
-		typeOptions: { minValue: 1, maxValue: 200 },
-		default: 50,
-		description: 'Max number of results to return',
-		displayOptions: { show: showGet },
-		routing: { send: { type: 'query', property: 'limit' } },
-	},
+	...returnAllAndLimit(showGet, 200),
 	{
 		displayName: 'Options',
 		name: 'options',
@@ -68,15 +59,6 @@ export const congressDescription: INodeProperties[] = [
 				default: 180,
 				description: 'Number of days to look back',
 				routing: { send: { type: 'query', property: 'days' } },
-			},
-			{
-				displayName: 'Offset',
-				name: 'offset',
-				type: 'number',
-				typeOptions: { minValue: 0 },
-				default: 0,
-				description: 'Number of results to skip',
-				routing: { send: { type: 'query', property: 'offset' } },
 			},
 		],
 	},

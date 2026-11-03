@@ -92,13 +92,13 @@ test('query parameters map to the names in the OpenAPI spec', () => {
 		for (const p of fieldsFor(resource, op)) {
 			const children = p.type === 'collection' ? p.options : [p];
 			for (const c of children) {
-				if (c.routing && c.routing.send) out[c.name] = c.routing.send.property;
+				if (c.routing && c.routing.send && c.routing.send.property) out[c.name] = c.routing.send.property;
 			}
 		}
 		return out;
 	};
 	assert.deepEqual(sent('company', 'search'), { query: 'q', limit: 'limit' });
-	assert.deepEqual(sent('insider', 'getTransactions'), { limit: 'limit', offset: 'offset' });
+	assert.deepEqual(sent('insider', 'getTransactions'), { limit: 'limit' });
 	assert.deepEqual(sent('filing', 'getRecentMaterial'), {
 		universe: 'universe',
 		limit: 'limit',
@@ -108,8 +108,33 @@ test('query parameters map to the names in the OpenAPI spec', () => {
 		limit: 'limit',
 		direction: 'direction',
 		days: 'days',
-		offset: 'offset',
 	});
+});
+
+test('list operations use Return All + Limit, never a user-facing Offset', () => {
+	for (const [resource, op, maxLimit] of [
+		['insider', 'getTransactions', 500],
+		['congress', 'getRecentTrades', 200],
+	]) {
+		const fields = fieldsFor(resource, op);
+		const flat = fields.flatMap((p) => (p.type === 'collection' ? [p, ...p.options] : [p]));
+		assert.ok(!flat.some((p) => p.name === 'offset'), `${resource}.${op} must not expose offset`);
+		const returnAll = fields.find((p) => p.name === 'returnAll');
+		assert.ok(returnAll, `${resource}.${op} has Return All`);
+		assert.equal(returnAll.type, 'boolean');
+		assert.equal(returnAll.default, false);
+		assert.equal(returnAll.routing.send.paginate, '={{ $value }}');
+		const pg = returnAll.routing.operations.pagination;
+		assert.equal(pg.type, 'offset');
+		assert.deepEqual(
+			{ l: pg.properties.limitParameter, o: pg.properties.offsetParameter, t: pg.properties.type },
+			{ l: 'limit', o: 'offset', t: 'query' },
+		);
+		assert.ok(pg.properties.pageSize >= 1 && pg.properties.pageSize <= maxLimit);
+		const limit = fields.find((p) => p.name === 'limit');
+		assert.deepEqual(limit.displayOptions.show.returnAll, [false]);
+		assert.equal(limit.typeOptions.maxValue, maxLimit);
+	}
 });
 
 test('base URL comes from the credential with trailing slashes removed', () => {

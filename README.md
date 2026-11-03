@@ -36,11 +36,11 @@ Each call uses API credits from your Signal8 plan. Credit costs are listed in th
 |---|---|---|---|
 | Company | Get Quote | `GET /companies/{ticker}/quote` | The latest quote for a ticker. Halted tickers include `halted`, `haltCode`, `haltReason`, `haltedAt` and `resumptionAt`. |
 | Company | Search | `GET /companies/search` | Companies matching a name or ticker, one item per company. |
-| Insider | Get Transactions | `GET /intelligence/{ticker}/insider-transactions` | Form 4 insider transactions, one item per transaction. Supports limit and offset. |
+| Insider | Get Transactions | `GET /intelligence/{ticker}/insider-transactions` | Form 4 insider transactions, one item per transaction. Return All, or up to a Limit. |
 | Dilution | Get Snapshot | `GET /dilution/{ticker}/snapshot` | The current dilution snapshot extracted from SEC filings, with citations. A null figure means it was not measured. Instrument rows are not part of this response. |
 | Filing | Get Recent Material Filings | `GET /filings/recent-material` | 8-K filings from the last 7 days for companies in the S&P 500, NASDAQ-100 or Dow Jones Industrial Average, filtered by item code. One item per filing. |
 | Trading Halt | List | `GET /trading-halts` | Trading halts currently active on NASDAQ, NYSE and NYSE American, one item per halt. No items means no halts are active. |
-| Congress | Get Recent Trades for Ticker | `GET /senate-insiders/by-ticker/{ticker}/recent-trades` | Recent STOCK Act disclosures for a ticker, one item per trade. Filter by direction, lookback days, limit and offset. |
+| Congress | Get Recent Trades for Ticker | `GET /senate-insiders/by-ticker/{ticker}/recent-trades` | Recent STOCK Act disclosures for a ticker, one item per trade. Filter by direction and lookback days. Return All, or up to a Limit. |
 
 Responses are unwrapped from the API's `{ "data": ... }` envelope. List operations return one n8n item per row.
 
