@@ -255,3 +255,15 @@ test('public copy has no em dashes or advice language', () => {
 	const banned = /\u2014|\u2013|\bbuy signal\b|\bprofit\b|beat the market|\brecommend|\bguarantee/i;
 	for (const t of texts) assert.ok(!banned.test(t), `disallowed copy: ${t}`);
 });
+
+test('trigger keeps optional fields inside an Options collection (n8n review)', () => {
+	const props = new Signal8Trigger().description.properties;
+	const top = props.map((p) => p.name);
+	assert.ok(!top.includes('items'), 'Item Codes must not be top-level');
+	assert.ok(!top.includes('limit'), 'Limit must not be top-level');
+	const options = props.find((p) => p.name === 'options');
+	assert.equal(options.type, 'collection');
+	assert.deepEqual(options.displayOptions.show.event, ['newMaterialFiling']);
+	assert.deepEqual(options.options.map((o) => o.name).sort(), ['items', 'limit']);
+	assert.equal(options.options.find((o) => o.name === 'limit').default, 50);
+});

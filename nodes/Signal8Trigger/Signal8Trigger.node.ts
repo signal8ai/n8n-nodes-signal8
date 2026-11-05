@@ -108,22 +108,30 @@ export class Signal8Trigger implements INodeType {
 				displayOptions: { show: { event: ['newMaterialFiling'] } },
 			},
 			{
-				displayName: 'Item Codes',
-				name: 'items',
-				type: 'string',
-				default: '',
-				placeholder: '1.01,5.02',
-				description: itemCodesDescription,
+				displayName: 'Options',
+				name: 'options',
+				type: 'collection',
+				placeholder: 'Add Option',
+				default: {},
 				displayOptions: { show: { event: ['newMaterialFiling'] } },
-			},
-			{
-				displayName: 'Limit',
-				name: 'limit',
-				type: 'number',
-				typeOptions: { minValue: 1, maxValue: 200 },
-				default: 50,
-				description: 'Max number of results to return',
-				displayOptions: { show: { event: ['newMaterialFiling'] } },
+				options: [
+					{
+						displayName: 'Item Codes',
+						name: 'items',
+						type: 'string',
+						default: '',
+						placeholder: '1.01,5.02',
+						description: itemCodesDescription,
+					},
+					{
+						displayName: 'Limit',
+						name: 'limit',
+						type: 'number',
+						typeOptions: { minValue: 1, maxValue: 200 },
+						default: 50,
+						description: 'Max number of results to return',
+					},
+				],
 			},
 		],
 	};
@@ -133,12 +141,16 @@ export class Signal8Trigger implements INodeType {
 		const config = EVENTS[event];
 		const credentials = await this.getCredentials('signal8Api');
 
+		const options =
+			event === 'newMaterialFiling'
+				? (this.getNodeParameter('options', {}) as { items?: string; limit?: number })
+				: {};
 		const params =
 			event === 'newMaterialFiling'
 				? {
 						universe: this.getNodeParameter('universe') as string,
-						items: this.getNodeParameter('items', '') as string,
-						limit: this.getNodeParameter('limit', 50) as number,
+						items: options.items ?? '',
+						limit: options.limit ?? 50,
 					}
 				: {};
 		const request = buildPollRequest(credentials.baseUrl, event, params);
